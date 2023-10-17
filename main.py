@@ -79,3 +79,5 @@ if player.strength > merchant.assertiveness:
         condition_2 = "The buyer is slightly stronger than you, so out of concern, you should still lower the price slightly."
 else:
     condition_2 = "There is no reason to lower the price based on the player's strength, consider only the previous circumstances."
+
+x= 1

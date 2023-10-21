@@ -1,4 +1,11 @@
 import random
+import openai
+import os
+
+#OpenAI API key
+openai.api_key = "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"
+
+
 
 class Player:
     def __init__(self):
@@ -34,10 +41,34 @@ def price_list(potions):
     print("---------------------------------------------")
     print("\n \n \n")
 
-def negotiatios(c1, c2):
-    print(c1)
-    print(c2)
+def negotiatios(c1, c2, context_conversation, product):
+    print("Well then, let's start negotiating the price")
+    print("\033[90mNow you can type the first message that will start the negotiation\033[0m \n")
+    for i in range(5):
+        messaage = input("You: ")
+        context_conversation += "Customer: " + messaage + "\n"
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"Take on the role of a concoction seller who sells such a product: {product}, your customer wants to negotiate with you earlier as part of the player's skill assessment two suggestions arose that you should consider: suggestion1 {c1}. suggestion2 {c2}. For each time we will had given the dialogue, set yourself a percentage based on these conditions below which you do not want to go and stick to it, remember that it can not be too low and to take into account the previously described conditions. Also, don't be too submissive with the player if he doesn't give any reasons to lower the price tell him you won't do it but be still open to negotiation. "
+                },
+                {
+                    "role": "user",
+                    "content": context_conversation
+                }
+            ],
+            temperature=0.5,
+            max_tokens=256,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
 
+        response_text = response.choices[0].message['content']  # Pobierz tekst odpowiedzi
+        context_conversation += response_text
+        print(response_text)
 
 # Creating potion instances
 potion1 = Potion(price=10, healing_points=20)
@@ -108,6 +139,8 @@ while True:
 print(chosen_potion)
 print(f"Your balance is {player.balance}$")
 
+context_conversation = ""
+
 negotiation_choice = input("\033[31m [!] Do you want to negotiate the price? [Y/N]: \033[0m")
 if negotiation_choice == "Y" or negotiation_choice == "y":
-    negotiatios(condition_1, condition_2)
+    negotiatios(condition_1, condition_2, context_conversation, chosen_potion)

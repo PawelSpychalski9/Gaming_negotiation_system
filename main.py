@@ -3,7 +3,7 @@ import openai
 import re
 
 # OpenAI API key
-openai.api_key = "Hello there"
+openai.api_key = "Hello there! These are not the keys you are looking for"
 
 class Player:
     def __init__(self):
@@ -44,7 +44,8 @@ def price_list(potions):
 def negotiations(c1, c2, context_conversation, product):
     print("Well then, let's start negotiating the price")
     print("\033[90mNow you can type the first message that will start the negotiation\033[0m \n")
-    for i in range(2):
+
+    for i in range(20):
         message = input("You: ")
         context_conversation += "Customer: " + message + "\n"
         response = openai.ChatCompletion.create(
@@ -91,22 +92,26 @@ def negotiations(c1, c2, context_conversation, product):
             suggested_price = re.search(r'\$\d+(?:\.\d+)?', response2['choices'][0]['message']['content'])
             new_price = suggested_price.group(0)
             new_price = float(new_price[1:])
-            print(new_price)
+            #print(new_price)
 
 
         except AttributeError:
             new_price = product.price
-            print(new_price)
+            #print(new_price)
 
-        print(10 * "-")
-        print(response2['choices'][0]['message']['content'])
+        #print(10 * "-")
+        #print(response2['choices'][0]['message']['content'])
         response_text = response['choices'][0]['message']['content']
         context_conversation += response_text
         print(response_text)
 
+        exit_choice = input(f"\033[90m[!] Do you accept this price {new_price}$ [Y/N]: \033[0m")
+        if exit_choice == "Y" or exit_choice == "y":
+            print("You have accepted the price")
+            break
+
     return new_price
-    #TODO: Add options to stop negotiations
-    #TODO: Add options to do not buy the potion
+
 
 
 
@@ -180,7 +185,26 @@ context_conversation = ""
 negotiation_choice = input("\033[31m [!] Do you want to negotiate the price? [Y/N]: \033[0m")
 if negotiation_choice == "Y" or negotiation_choice == "y":
     new_potion_price = negotiations(condition_1, condition_2, context_conversation, chosen_potion)
+    buy_choice = input(f"\033[31m [!] Do you want to buy this potion? for {new_potion_price}? [Y/N] \033[0m")
+    if buy_choice == "Y" or buy_choice == "y":
+        if new_potion_price > player.balance:
+            print("You don't have enough money to buy this potion")
 
-player.update_balance_spend(new_potion_price)
+        else:
+            print(f"you have bought the potion for {new_potion_price}$, you saved {chosen_potion.price - new_potion_price}$")
+            player.update_balance_spend(new_potion_price)
+
+    else:
+        print("You didn't buy the potion")
+
+else:
+    buy_choice = input(f"\033[31m [!] Do you want to buy this potion? for {chosen_potion.price}? [Y/N] \033[0m")
+    if buy_choice == "Y" or buy_choice == "y":
+        if chosen_potion.price > player.balance:
+            print("You don't have enough money to buy this potion")
+        else:
+            print(f"you have bought the potion for {chosen_potion.price}$")
+            player.update_balance_spend(chosen_potion.price)
+
 print(f"Your balance is {player.balance}$")
 
